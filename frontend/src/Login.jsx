@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import axios from "axios"
 
 const Login = () =>{
+    axios.defaults.withCredentials = true;
 
     //state for a form
     const [formData, setFormData] = useState({
@@ -26,7 +27,29 @@ const Login = () =>{
     //handle onclick when submitting the form
     const HandleSubmit = () => {
         event.preventDefault()
-        console.log('submitted')
+            const logUser = async () => {
+                try {
+                    const response = await axios.post('http://localhost:5000/login', formData)
+                    console.log(response.data)
+                } catch (error) {
+                    console.log(error)
+                }
+                
+            }
+            logUser()
+    }
+
+    const getProfile = () => {
+        event.preventDefault()
+            const getUser = async () => {
+                try {
+                    const response = await axios.get('http://localhost:5000/profile')
+                    console.log(response.data)
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+            getUser()
     }
 
 
@@ -39,6 +62,7 @@ const Login = () =>{
                 <input type="password" name="password" onChange={HandleChange}required minLength={8} />
                 <button>Login</button>
             </form>
+            <button onClick={getProfile}>Profile</button>
         </section>
         </>
     )

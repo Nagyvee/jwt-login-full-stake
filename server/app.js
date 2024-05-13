@@ -1,7 +1,9 @@
 const express = require('express')
 const jwt = require('jsonwebtoken')
 const app = express()
+const cookieParser = require('cookie-parser')
 const bodyParser = require('body-parser')
+const cors = require('cors')
 require("dotenv").config()
 const SECRET_KEY = process.env.SECRET
 
@@ -18,6 +20,12 @@ const user = [{
 }
 ]
 
+app.use(cors({
+    origin: "http://localhost:5174",
+    credentials: true
+}))
+
+
 app.use(bodyParser.json())
 app.get('/', (req,res) =>{
     res.json({status: true, user: user})
@@ -29,14 +37,20 @@ app.post('/login', (req,res) =>{
     const userReq = user.find((userObj) => userObj.username === userId)
 
     if(userReq === undefined ) {res.send('wrong username')}else{
-      const token =  jwt.sign(userReq,SECRET_KEY, {'expiresIn': '60s'})
-      res.cookie(token)
-    res.send(token)
+      const token =  jwt.sign(userReq,SECRET_KEY, {'expiresIn': '180s'})
+      res.cookie('authToken', token, {
+        maxAge: 1000 * 60 * 5,
+        httpOnly: true
+      })
+     res.json({status: true, msg: 'Logged in successfully.'})
     }
 })
 
+
+app.use(cookieParser())
 const verification = (req,res,next) =>{
-    const token = req.headers.auth
+    const token = req.cookies["authToken"]
+    console.log(token)
 
     if(!token) res.send('token required to access')
     if(token) {
@@ -46,8 +60,6 @@ const verification = (req,res,next) =>{
         })
     }
 }
-
-
 
 app.get('/profile', verification, (req,res) =>{
     res.send(`Welcome back ${req.user.username}`)
