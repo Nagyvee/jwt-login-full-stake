@@ -20,7 +20,28 @@ const tokenVerification = async (req, res, next) => {
 };
 
 const logIn = async (req, res) => {
-    const {username,password} = req.body
+    const reqUsername = req.body.username
+    const reqPassword = req.body.password
+    
+    const query = `SELECT * FROM users WHERE username = ?`
+     pool.query(query,[reqUsername], (err,result) => {
+        if(err) res.json({status:false, msg: 'error occur.Please try again later.'})
+        if(result.length < 1) res.json({status:false, msg: "incorrect username"}) 
+        else{
+            const {username,firstName,lastName,password,email} = result[0]
+            bcrypt.compare(reqPassword,password, function(err,match) {
+                if(err) {console.log(err)}
+                else if(match) {
+                    const user = { username, firstName, lastName, email };
+                   const token = jwt.sign(user,SECRET_KEY,{"expiresIn": "180m"})
+                   res.cookie("authToken",token,{httpOnly: true, expiresIn: 1000 * 60 * 4})
+                   res.json({status: true, msg: "logged in successfully"})
+                }
+                else res.json({status:false, msg: "incorrect password"}) 
+            }) 
+        }
+     })
+
 };
 
 const registerUser = async (req, res) => {
@@ -31,7 +52,7 @@ const registerUser = async (req, res) => {
     const query = `INSERT INTO users(username,password,firstName,lastName,email) VALUES (?,?,?,?,?)`;
     await pool
       .promise()
-      .query(query, [username, password, firstName, lastName, password]);
+      .query(query, [username, hashPassword, firstName, lastName, email]);
     const user = { username, firstName, lastName, email };
     const token = await jwt.sign(user, SECRET_KEY, { expiresIn: "180s" });
     res.cookie("authToken", token, { httpOnly: true, maxAge: 1000 * 60 * 4 });
