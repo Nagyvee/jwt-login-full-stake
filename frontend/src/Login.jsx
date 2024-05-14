@@ -21,7 +21,6 @@ const Login = () =>{
                 [name]: value
             }
         })
-        console.log(formData)
     }
 
     //handle onclick when submitting the form
