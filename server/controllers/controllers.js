@@ -6,11 +6,11 @@ const SECRET_KEY = process.env.SECRET_JWT;
 
 const tokenVerification = async (req, res, next) => {
   const token = req.cookies["authToken"];
-  if (!token) res.status(400).json({ status: false, msg: "token is required" });
+  if (!token) res.status(401).json({ status: false, msg: "token is required" });
 
   if (token) {
     jwt.verify(token, SECRET_KEY, (err, result) => {
-      if (err) res.status(400).json({ status: false, msg: "invalid token" });
+      if (err) res.status(403).json({ status: false, msg: "invalid token" });
       else {
         req.user = result;
         next();
@@ -26,7 +26,7 @@ const logIn = async (req, res) => {
     const query = `SELECT * FROM users WHERE username = ?`
      pool.query(query,[reqUsername], (err,result) => {
         if(err) res.status(401).json({status:false, msg: 'error occur.Please try again later.'})
-        if(result.length < 1) res.status(400).json({status:false, msg: "incorrect username"}) 
+       else if(result.length < 1) res.status(400).json({status:false, msg: "incorrect username"}) 
         else{
             const {username,firstName,lastName,password,email} = result[0]
             bcrypt.compare(reqPassword,password, function(err,match) {
@@ -56,7 +56,7 @@ const registerUser = async (req, res) => {
     const user = { username, firstName, lastName, email };
     const token = await jwt.sign(user, SECRET_KEY, { expiresIn: "180s" });
     res.cookie("authToken", token, { httpOnly: true, maxAge: 1000 * 60 * 3});
-    res.status(200).json({ status: true, msg: "user creation successfull" });
+    res.status(200).json({ status: true, msg: "user creation is successfull" });
   } catch (error) {
     res.status(401).json({
       status: false,
@@ -71,7 +71,7 @@ const getUserProfile = async (req, res) => {
 };
 
 module.exports = {
-  logIn,
+  logIn, 
   registerUser,
   tokenVerification,
   getUserProfile,
