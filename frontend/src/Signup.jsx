@@ -3,7 +3,7 @@ import logoImg from "./assets/ruix logo.png";
 import googleLogo from "./assets/google logo.png";
 import "./Signup.css";
 import { useState, useEffect } from "react";
-import {axios} from "axios"
+import axios from "axios"
 
 export default function () {
 
@@ -29,7 +29,7 @@ export default function () {
         if (name === "email") {
             setIsValidEmail(validateEmail(value));
         }
-        
+
         if (name === "name") {
           setIsValidName(validateName(value));
           console.log(validateName(value))
@@ -72,6 +72,8 @@ export default function () {
         // Form submission 
         if (allValid) {
             console.log("Form is valid:", userDetails);
+            const response = axios.post("https://localhost:5000/register",userDetails)
+            console.log(response)
         } else {
             console.log("Form is invalid. Please correct the errors.", userDetails);
         }
