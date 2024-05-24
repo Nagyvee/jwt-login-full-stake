@@ -5,7 +5,7 @@
     width: 85%;
     height: 575px;
     display: grid;
-    grid-template-columns: 50% 50%;
+    grid-template-columns: repeat(auto-fit , minmax(395px,1fr));
     font-family: "Urbanist", sans-serif;
     font-optical-sizing: auto;
 }
