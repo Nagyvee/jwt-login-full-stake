@@ -3,10 +3,12 @@ import logoImg from "./assets/ruix logo.png";
 import googleLogo from "./assets/google logo.png";
 import "./Signup.css";
 import { useState, useEffect } from "react";
+import { useNavigate} from "react-router-dom"
 import axios from "axios"
 
 export default function () {
 
+  const navigate = useNavigate()
     const [userDetails, setUserDetails] = useState({
         name: "",
         email:"",
@@ -18,6 +20,7 @@ export default function () {
     const [isValidEmail, setIsValidEmail] = useState(false);
     const [isValidPassword, setIsValidPassword] = useState(false);
 
+    axios.defaults.withCredentials = true; 
     useEffect(() => {
         setAllValid(isValidEmail && isValidPassword && isValidName);
     }, [isValidEmail,isValidName, isValidPassword]);
@@ -32,7 +35,6 @@ export default function () {
 
         if (name === "name") {
           setIsValidName(validateName(value));
-          console.log(validateName(value))
       }
 
         // Password validation
@@ -54,7 +56,7 @@ export default function () {
     };
 
     const validateName = (name) =>{
-      const re = /^[a-zA-Z]{4,}$/
+      const re = /^[a-zA-Z\s]{4,}$/
       return  re.test(name)
     }
 
@@ -67,13 +69,20 @@ export default function () {
         return password.length >= 8;
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         // Form submission 
         if (allValid) {
-            console.log("Form is valid:", userDetails);
-            const response = axios.post("https://localhost:5000/register",userDetails)
-            console.log(response)
+            try {
+              const response = await axios.post("http://localhost:5000/register",userDetails)
+              const data = response.data
+              await localStorage.setItem("u_t_n", data.authToken)
+               navigate("/user/profile")
+              
+            } catch (error) {
+              console.log(error)
+            }
+
         } else {
             console.log("Form is invalid. Please correct the errors.", userDetails);
         }

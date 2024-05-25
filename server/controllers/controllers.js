@@ -45,19 +45,22 @@ const logIn = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-  const { username, password, email, firstName, lastName } = req.body;
+  const { name, password, email} = req.body;
+  console.log(req.body)
 
   try {
     const hashPassword = await bcrypt.hash(password, 10);
-    const query = `INSERT INTO users(username,password,firstName,lastName,email) VALUES (?,?,?,?,?)`;
+    console.log(hashPassword)
+    const query = `INSERT INTO users(name,password,email) VALUES (?,?,?)`;
     await pool
       .promise()
-      .query(query, [username, hashPassword, firstName, lastName, email]);
-    const user = { username, firstName, lastName, email };
-    const token = await jwt.sign(user, SECRET_KEY, { expiresIn: "180s" });
+      .query(query, [name, hashPassword, email]);
+    const user = { name, email };
+    const token = await jwt.sign(user, SECRET_KEY, { expiresIn: "600s" });
     res.cookie("authToken", token, { httpOnly: true, maxAge: 1000 * 60 * 3});
-    res.status(200).json({ status: true, msg: "user creation is successfull" });
+    res.status(200).json({ status: true, msg: "user creation is successfull", authToken: token });
   } catch (error) {
+    console.log(error)
     res.status(401).json({
       status: false,
       msq: "error occur while processing. Please try again later",
