@@ -20,22 +20,22 @@ const tokenVerification = async (req, res, next) => {
 };
 
 const logIn = async (req, res) => {
-    const reqUsername = req.body.username
+    const reqEmail= req.body.email
     const reqPassword = req.body.password
     
-    const query = `SELECT * FROM users WHERE username = ?`
-     pool.query(query,[reqUsername], (err,result) => {
+    const query = `SELECT * FROM users WHERE email = ?`
+     pool.query(query,[reqEmail], (err,result) => {
         if(err) res.status(401).json({status:false, msg: 'error occur.Please try again later.'})
        else if(result.length < 1) res.status(400).json({status:false, msg: "incorrect username"}) 
         else{
-            const {username,firstName,lastName,password,email} = result[0]
+            const {id,name,password,email, profile_img} = result[0]
             bcrypt.compare(reqPassword,password, function(err,match) {
                 if(err) {console.log(err)}
                 else if(match) {
-                    const user = { username, firstName, lastName, email };
-                   const token = jwt.sign(user,SECRET_KEY,{"expiresIn": "180m"})
-                   res.cookie("authToken",token,{httpOnly: true, expiresIn: 1000 * 60 * 3})
-                   res.status(200).json({status: true, msg: "logged in successfully"})
+                    const user = { id, name, email , profile_img};
+                   const token = jwt.sign(user,SECRET_KEY,{"expiresIn": "600m"})
+                   res.cookie("authToken",token,{httpOnly: true, expiresIn: 1000 * 60 * 10})
+                   res.status(200).json({ status: true, msg: "logged in successfully", authToken: token });
                 }
                 else res.status(400).json({status:false, msg: "incorrect password"}) 
             }) 
@@ -55,10 +55,7 @@ const registerUser = async (req, res) => {
     await pool
       .promise()
       .query(query, [name, hashPassword, email]);
-    const user = { name, email };
-    const token = await jwt.sign(user, SECRET_KEY, { expiresIn: "600s" });
-    res.cookie("authToken", token, { httpOnly: true, maxAge: 1000 * 60 * 3});
-    res.status(200).json({ status: true, msg: "user creation is successfull", authToken: token });
+    res.status(200).json({ status: true, msg: "user creation is successfull" });
   } catch (error) {
     console.log(error)
     res.status(401).json({
@@ -73,9 +70,23 @@ const getUserProfile = async (req, res) => {
   res.status(200).json({ status: true, msg: `Welcome back ${firstName} ${lastName} 😊!` });
 };
 
+const updateProfile = async (req,res) =>{
+  const {id,name,email,img} = req.body
+  const query = `update users SET name = ?, email = ? , profille_img = ? where id = ?`;
+       try {
+        const sqlRes =   pool.query(query, [name,email,img,id])
+        res.send('done')
+        console.log(sqlRes)
+       } catch (error) {
+        console.log(err)
+        res.send('error occur on server')
+       }
+}
+
 module.exports = {
   logIn, 
   registerUser,
   tokenVerification,
   getUserProfile,
+  updateProfile
 };

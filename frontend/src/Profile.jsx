@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { setUser } from "./state-redux/actions";
+import axios from "axios"
 
 export default function Profile() {
   const userTkn = localStorage.getItem("u_t_n");
@@ -21,11 +22,13 @@ export default function Profile() {
     try {
       const decodedTkn = jwtDecode(userTkn);
       const user = {
-        id: null,
-        img: null,
+        id: decodedTkn.id,
+        img: decodedTkn.profile_img,
         name: decodedTkn.name,
         email: decodedTkn.email,
       };
+
+      console.log(decodedTkn)
       
        dispatch(setUser(user))
        setUserInfo(user)
@@ -61,10 +64,16 @@ export default function Profile() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     event.preventDefault()
-    setIsEditing(false)
+    try {
+        const res = await axios.post('http://localhost:5000/update-profile', userInfo)
+        console.log(res)
+    } catch (error) {
+        console.log(error)
+    }
   }
+
 
   return (
     <section>
