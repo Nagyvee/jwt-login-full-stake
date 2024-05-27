@@ -71,6 +71,7 @@ const getUserProfile = async (req, res) => {
 };
 
 const updateProfile = async (req,res) =>{
+  console.log(req.body)
   const {id,name,email,img} = req.body
   const query = `update users SET name = ?, email = ? , profille_img = ? where id = ?`;
        try {

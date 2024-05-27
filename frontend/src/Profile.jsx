@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { setUser } from "./state-redux/actions";
-import axios from "axios"
+import axios, { formToJSON } from "axios"
 
 export default function Profile() {
   const userTkn = localStorage.getItem("u_t_n");
@@ -52,8 +52,9 @@ export default function Profile() {
       reader.onload = (e) => {
         setUserInfo((prevData) => ({
           ...prevData,
-          img: e.target.result,
+          img: files[0],
         }));
+        console.log(userInfo)
       };
       reader.readAsDataURL(event.target.files[0]);
     } else {
@@ -66,8 +67,19 @@ export default function Profile() {
 
   const handleSubmit = async () => {
     event.preventDefault()
+
+    const formData = new FormData();
+    formData.append("name", userInfo.name);
+    formData.append("email", userInfo.email);
+    formData.append("img", userInfo.img)
+
+
     try {
-        const res = await axios.post('http://localhost:5000/update-profile', userInfo)
+
+        const res = await axios.post(
+            "http://localhost:5000/update-profile",
+       formData
+          );
         console.log(res)
     } catch (error) {
         console.log(error)
@@ -80,10 +92,7 @@ export default function Profile() {
       {userDetails.email !== null ? (
         <div className="profile">
           <img
-            src={
-                isEditing? userInfo.img === null ? profileImg : userInfo.img:
-                userDetails.img === null ? profileImg : userDetails.img
-            }
+            src="http://localhost:5000/uploads/1716810345129.jpg"
             alt="your profile"
           />
           {isEditing ? (

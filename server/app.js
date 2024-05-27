@@ -4,6 +4,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const router = require('./routes/routes')
+const path = require("path")
 require('dotenv').config()
 const port = 5000
 
@@ -13,6 +14,8 @@ app.use(cors({
 }))
 app.use(bodyParser.json())
 app.use(cookieParser())
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req,res) =>{
     res.json({status: true, msg: 'welcome to our API'})
