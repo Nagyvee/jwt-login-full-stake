@@ -169,7 +169,7 @@ export default function () {
                 <br />
                 {allValid && (
                   <button className="submit-btn" type="submit">
-                    Register
+                   {!isLogging? "Register" : "Login"}
                   </button>
                 )}
               </form>
