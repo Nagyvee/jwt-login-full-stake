@@ -19,10 +19,16 @@ export default function () {
   const [isValidName, setIsValidName] = useState(false);
   const [isValidEmail, setIsValidEmail] = useState(false);
   const [isValidPassword, setIsValidPassword] = useState(false);
+  const [isLogging, setIsLogging] = useState(true)
 
   axios.defaults.withCredentials = true;
   useEffect(() => {
-    setAllValid(isValidEmail && isValidPassword && isValidName);
+    if(!isLogging){
+        setAllValid(isValidEmail && isValidPassword && isValidName);
+    }
+     if(isLogging)   setAllValid(isValidEmail && isValidPassword);
+    
+    
   }, [isValidEmail, isValidName, isValidPassword]);
 
   const handleChange = (event) => {
@@ -74,11 +80,13 @@ export default function () {
     // Form submission
     if (allValid) {
       try {
+        if(!isLogging){
         const response = await axios.post(
           "http://localhost:5000/register",
           userDetails
         );
         setIsCreated(true);
+    }
         const response2 = await axios.post(
             "http://localhost:5000/login", userDetails,
         )
@@ -86,6 +94,7 @@ export default function () {
         await localStorage.setItem("u_t_n", data.authToken);
         console.log(response2)
         navigate("/user/profile")
+        
       } catch (error) {
         console.log(error);
       } finally{
@@ -104,8 +113,13 @@ export default function () {
 
           {!isCreated ? (
             <>
-              <h2>SIGN UP</h2>
+            {!isLogging?
+            <>
+             <h2>SIGN UP</h2>
               <h3>Create an account to get started.</h3>
+              </>:
+              <h2>Login</h2>
+          }
               <button className="google-login-btn">
                 <img src={googleLogo} alt="Google sign in" />
                 Sign in with Google
@@ -118,7 +132,7 @@ export default function () {
               </div>
 
               <form onSubmit={handleSubmit}>
-                <input
+             {!isLogging &&   <input
                   onChange={handleChange}
                   className="type-input"
                   placeholder="Name"
@@ -127,6 +141,7 @@ export default function () {
                   minLength={4}
                   required
                 />
+             }
                 <input
                   onChange={handleChange}
                   className="type-input"
@@ -158,10 +173,16 @@ export default function () {
                   </button>
                 )}
               </form>
-              <p className="login-p">
+             {!isLogging ? <p className="login-p">
                 Already have an account?
-                <span className="login-txt">Log in</span>
-              </p>
+                <span className="login-txt" onClick={() => setIsLogging(true)}>Log in</span>
+              </p>:
+              <p className="login-p">
+              Don't have account?
+              <span className="login-txt" onClick={() => setIsLogging(false)}>Sign up</span>
+            </p>
+
+            }
             </>
           ) : (
             <div>

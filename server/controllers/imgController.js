@@ -1,5 +1,8 @@
 const multer = require("multer")
+const jwt = require("jsonwebtoken")
 const path = require("path")
+const SECRET_KEY = process.env.SECRET_JWT;
+const pool = require("../connectdb")
 
 const storage = multer.diskStorage({
     destination: function(req,file,cb){
@@ -12,16 +15,38 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage: storage})
 
- const uploadFile = async (req,res) => {
-    console.log(req.body)
+const uploadFile = async (req, res) => {
+    const { id, name, email } = req.body;
+    const query = 'UPDATE users SET name = ?, email = ?, profile_img = ? WHERE id = ?';
     try {
-        if(!req.file){
-            return res.status(400).json({status: false,msg: "no file uploaded"})
-        }
-        const imgUrl = `http://localhost:5000/${req.file.path.replace(/\\/g, '/')}`;
-        res.status(200).json({status: true, msg: "image received"})
-        console.log(imgUrl)
-    } catch (error) {}
-}
+      if (!req.file) {
+        return res.status(400).json({ status: false, msg: 'No file uploaded' });
+      }
+      const profile_img = `http://localhost:5000/${req.file.path.replace(/\\/g, '/')}`;
+      const sqlRes = await pool.promise().query(query, [name, email, profile_img, id]);
+      const user = { id, name, email , profile_img};
+      const token = jwt.sign(user,SECRET_KEY,{"expiresIn": "600m"})
+      res.cookie("authToken",token,{httpOnly: true, expiresIn: 1000 * 60 * 10})
+      res.status(200).json({ status: true, msg: "logged in successfully", authToken: token });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ msg: 'Error occurred on server' });
+    }
+  };
+  
+
+// const updateProfile = async (req,res) =>{
+//     console.log(req.body)
+//     const {id,name,email,img} = req.body
+//     const query = `update users SET name = ?, email = ? , profille_img = ? where id = ?`;
+//          try {
+//           const sqlRes =   pool.query(query, [name,email,img,id])
+//           res.send('done')
+//           console.log(sqlRes)
+//          } catch (error) {
+//           console.log(err)
+//           res.send('error occur on server')
+//          }
+//   }
 
 module.exports = {uploadFile, upload}

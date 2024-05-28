@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { json } = require("body-parser");
 const SECRET_KEY = process.env.SECRET_JWT;
-
 const tokenVerification = async (req, res, next) => {
   const token = req.cookies["authToken"];
   if (!token) res.status(401).json({ status: false, msg: "token is required" });
@@ -22,6 +21,8 @@ const tokenVerification = async (req, res, next) => {
 const logIn = async (req, res) => {
     const reqEmail= req.body.email
     const reqPassword = req.body.password
+    const {rememberMe} = req.body
+    let time
     
     const query = `SELECT * FROM users WHERE email = ?`
      pool.query(query,[reqEmail], (err,result) => {
@@ -33,7 +34,9 @@ const logIn = async (req, res) => {
                 if(err) {console.log(err)}
                 else if(match) {
                     const user = { id, name, email , profile_img};
-                   const token = jwt.sign(user,SECRET_KEY,{"expiresIn": "600m"})
+                    if(rememberMe)  time = "148h"
+                    else time = "1h"
+                   const token = jwt.sign(user,SECRET_KEY,{"expiresIn": time})
                    res.cookie("authToken",token,{httpOnly: true, expiresIn: 1000 * 60 * 10})
                    res.status(200).json({ status: true, msg: "logged in successfully", authToken: token });
                 }

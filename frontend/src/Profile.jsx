@@ -6,10 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { setUser } from "./state-redux/actions";
-import axios, { formToJSON } from "axios"
+import axios from "axios"
 
 export default function Profile() {
   const userTkn = localStorage.getItem("u_t_n");
+  const [count,setCount] = useState(0)
   const navigate = useNavigate();
 
   const dispatch = useDispatch()
@@ -27,23 +28,20 @@ export default function Profile() {
         name: decodedTkn.name,
         email: decodedTkn.email,
       };
-
-      console.log(decodedTkn)
-      
+      console.log(decodedTkn.exp * 1000)
+      console.log("now:", Date.now())
+      console.log("diff:" ,decodedTkn.exp * 1000 - Date.now() )
        dispatch(setUser(user))
-       setUserInfo(user)
+       setUserInfo({...user, imgPreview: decodedTkn.profile_img})
 
       const now = Date.now();
       if (decodedTkn.exp * 1000 < now) {
-        // navigate('/user/signup')
-        console.log("invalid");
-      } else {
-        console.log("Profile information:", user); // Log user information
+       return navigate('/user/signup')
       }
     } catch (error) {
       console.log(error);
     }
-  }, []);
+  }, [count]);
 
   const handleChange = () => {
     const { value, name, files, result } = event.target;
@@ -53,8 +51,8 @@ export default function Profile() {
         setUserInfo((prevData) => ({
           ...prevData,
           img: files[0],
+          imgPreview: e.target.result
         }));
-        console.log(userInfo)
       };
       reader.readAsDataURL(event.target.files[0]);
     } else {
@@ -69,6 +67,7 @@ export default function Profile() {
     event.preventDefault()
 
     const formData = new FormData();
+    formData.append("id", userDetails.id)
     formData.append("name", userInfo.name);
     formData.append("email", userInfo.email);
     formData.append("img", userInfo.img)
@@ -80,7 +79,9 @@ export default function Profile() {
             "http://localhost:5000/update-profile",
        formData
           );
-        console.log(res)
+          await localStorage.setItem("u_t_n", res.data.authToken)
+        setCount(prevCount => prevCount += 1 )
+        setIsEditing(false)
     } catch (error) {
         console.log(error)
     }
@@ -92,7 +93,10 @@ export default function Profile() {
       {userDetails.email !== null ? (
         <div className="profile">
           <img
-            src="http://localhost:5000/uploads/1716810345129.jpg"
+            src={
+                isEditing? userInfo.imgPreview === null ? profileImg : userInfo.imgPreview:
+                userDetails.img === null ? profileImg : userDetails.img
+            }
             alt="your profile"
           />
           {isEditing ? (
