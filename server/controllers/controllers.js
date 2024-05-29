@@ -67,14 +67,16 @@ const registerUser = async (req, res) => {
     //hash password
     const hashPassword = await bcrypt.hash(password, 10);
     console.log(hashPassword)
-    //inbsert into db
+    //insert into db
     const query = `INSERT INTO users(name,password,email) VALUES (?,?,?)`;
     await pool
       .promise()
       .query(query, [name, hashPassword, email]);
+      //response
     res.status(200).json({ status: true, msg: "user creation is successfull" });
   } catch (error) {
     console.log(error)
+    //if any error
     res.status(401).json({
       status: false,
       msq: "error occur while processing. Please try again later",
@@ -83,6 +85,7 @@ const registerUser = async (req, res) => {
 };
 
 const getUserProfile = async (req, res) => {
+  //requiremwents from req.user after passing the token verification
     const {username,firstName,lastName,password} = req.user
   res.status(200).json({ status: true, msg: `Welcome back ${firstName} ${lastName} 😊!` });
 };
