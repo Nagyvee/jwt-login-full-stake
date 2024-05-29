@@ -91,13 +91,14 @@ const getUserProfile = async (req, res) => {
 };
 
 const updateProfile = async (req,res) =>{
-  console.log(req.body)
+  //requirements
   const {id,name,email,img} = req.body
   const query = `update users SET name = ?, email = ? , profille_img = ? where id = ?`;
        try {
+        //query db with new details
         const sqlRes =   pool.query(query, [name,email,img,id])
+        //if done
         res.send('done')
-        console.log(sqlRes)
        } catch (error) {
         console.log(err)
         res.send('error occur on server')
