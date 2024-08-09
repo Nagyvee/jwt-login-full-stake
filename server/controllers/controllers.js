@@ -1,6 +1,6 @@
 const pool = require("../connectdb");
 const jwt = require("jsonwebtoken"); //importing jwt library
-const bcrypt = require("bcrypt"); 
+const bcrypt = require('bcryptjs');
 const { json } = require("body-parser");
 const SECRET_KEY = process.env.SECRET_JWT;
 
