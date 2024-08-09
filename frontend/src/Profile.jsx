@@ -36,10 +36,10 @@ export default function Profile() {
 
       const now = Date.now();
       if (decodedTkn.exp * 1000 < now) {
-       return navigate('/user/signup')
+       return navigate('/user/login')
       }
     } catch (error) {
-      console.log(error);
+      return navigate('/user/signup')
     }
   }, [count]);
 
