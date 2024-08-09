@@ -77,18 +77,19 @@ export default function () {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const URL = import.meta.env.VITE_SERVER_URL
     // Form submission
     if (allValid) {
       try {
         if(!isLogging){
         const response = await axios.post(
-          "http://localhost:5000/register",
+          `${URL}/register`,
           userDetails
         );
         setIsCreated(true);
     }
         const response2 = await axios.post(
-            "http://localhost:5000/login", userDetails,
+            `${URL}/login", userDetails`,
         )
         const data = response2.data;
         await localStorage.setItem("u_t_n", data.authToken);

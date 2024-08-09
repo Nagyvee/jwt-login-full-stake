@@ -74,9 +74,9 @@ export default function Profile() {
 
 
     try {
-
+      const URL = import.meta.env.VITE_SERVER_URL
         const res = await axios.post(
-            "http://localhost:5000/update-profile",
+          `${URL}/update-profile`,
        formData
           );
           await localStorage.setItem("u_t_n", res.data.authToken)

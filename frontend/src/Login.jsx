@@ -9,6 +9,7 @@ const Login = () =>{
         username: "",
         password: "",
     })
+    const URL = import.meta.env.VITE_SERVER_URL;
 
     //onchanging input values
     const HandleChange = () => {
@@ -28,7 +29,7 @@ const Login = () =>{
         event.preventDefault()
             const logUser = async () => {
                 try {
-                    const response = await axios.post('http://localhost:5000/login', formData)
+                    const response = await axios.post(`${URL}/login`, formData)
                     console.log(response.data)
                 } catch (error) {
                     console.log(error)
