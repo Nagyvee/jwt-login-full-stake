@@ -10,7 +10,7 @@ const port = 5000
 
 //allow our frontend access
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173',"https://jwt-login-full-stake-2.onrender.com"],
     credentials: true //to accept cookies
 }))
 app.use(bodyParser.json())
